@@ -1,85 +1,74 @@
+import random
+
 class state:
-    h = 0
-    g =0
-    f = 0
-    parent = None
-    s = []
-
-def count_tiles(curr,goal):
-    s = curr.s
-    g =goal.s
-    count = 0
-    i = 0
-    while i<len(s):
-        if s[i] != g[i]:
-            count+=1
-        i+=1
-    return count
-
-def get_neighbours(curr):
-    neighbours= []
-    b = curr.s.index(0)
-    r = b//3
-    c = b%3
-    directions = [[1,0],[0,1],[-1,0],[0,-1]]
-    for d in directions:
-        nr = d[0]
-        nc = d[1]
-
-        mr = nr+r 
-        mc = nc+c
-
-        if mr >=0 and mr<3:
-            if mc >= 0 and mc<3:
-                n = mr*3 +mc
-                new = state()
-                new.s = curr.s.copy()
-                new.s[b] , new.s[n] = new.s[n],new.s[b]
-                
-                neighbours.append(new)
-    return neighbours
+  c = []
+  cost = 0
 
 
 
-
-def solve(start,goal):
-    queue = [start]
-    seen = set()
-    
-    while queue:
-        queue.sort(key=lambda x: x.f)
-         
-        curr = queue.pop(0)
-        seen.add(tuple(curr.s))
-        if curr.s == goal.s:
-            path = []
-            while curr.parent != None:
-                path.append(curr.parent.s)
-                curr = curr.parent
-            return path
-        n = get_neighbours(curr)
-        for i in n:
-            if  tuple(i.s) in seen:
-                continue
-            g = curr.g +1
-            h = count_tiles(i, goal)
-            f = g+h
-            i.g =g
-            i.h = h
-            i.f = f
-            i.parent = curr
-            queue.append(i)
-
-start = state()
-start.s = [1,2,3,4,5,6,7,8,0]
-goal  = state()
-goal.s = [1,2,3,4,5,6,7,0,8]
-print("start state is ", list(start.s))
-print("goal state is  ", list(goal.s))
-print("the path to goal state is", solve(start,goal))
+def cost(board,n):
+  count = 0
+  i =0 
+  while i<=n-2:
+    j = 0
+    while j<=n-1:
+      if (board.c[i] == board.c[j]) or (abs(board.c[i] - board.c[j]) == j-i):
+        count +=1
+      j+=1
+    i+=1
+  return count
 
 
+def hillclimb(current,n):
+  #for initial state
+  
+  
+  current.cost = cost(current,n)
+  print("the cost of initial state is", current.cost)
+
+  while current.cost!= 0:
+    best = state()
+    best.cost = 1000000000
+
+    c = 0
+    while c <=n-1:
+      r = 0
+      while r<=n-1 and r != current.c[c]:
+        neighbour = state()
+        neighbour.c = current.c[:]
+        neighbour.c[c] =r
         
+        neighbour.cost= cost(neighbour,n)
+        if neighbour.cost<best.cost:
+          best = neighbour
+        r+=1
+      c+=1
+    if best.cost >= current.cost:
+      print("local minimum reached")
+      print("cost of the final state =" ,current.cost)
+      print("the final state is" ,current.c)
+      return
+    current  = best
+  return current.c 
+
+n = int(input("enter the board size (number of queens):"))
+i = 0
+current = state()
+while i<n:
+  print("enter the row positon of queen of col ",i)
+  r = int(input())
+  if r<0 or r>n-1:
+    input("invalid type again press enter to reenter")
+  else:
+    current.c.append(r)
+    i+=1
 
 
-    
+
+print("the initial state is", current.c)
+hillclimb(current,n)
+
+
+
+
+
